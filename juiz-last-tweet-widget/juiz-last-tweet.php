@@ -5,16 +5,14 @@
 	Description: Adds a widget to your blog's sidebar to show your latest tweets. (XHTML-valid - No JS used to load tweets) - <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=P39NJPCWVXGDY&lc=FR&item_name=Juiz%20Last%20Tweet%20Widget%20%2d%20WordPress%20Plugin&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHostedGuest" title="Thank you!">Donate to contribute</a>
 	Author: Geoffrey Crofte
 	Author URI: https://geoffrey.crofte.fr/en/
-	Version: 1.3.7
+	Version: 1.3.8
 	License: GPLv2 or later 
 	License URI: https://www.gnu.org/licenses/gpl-2.0.html
 	Text Domain: juiz-last-tweet-widget
 	Domain Path: /languages
 
-
 	Copyright 2011 -  Geoffrey Crofte  (email : support@creativejuiz.com)
 
-	    
 	This program is free software; you can redistribute it and/or
 	modify it under the terms of the GNU General Public License
 	as published by the Free Software Foundation; either version 2
@@ -33,7 +31,7 @@
 
 
 define( 'JUIZ_LTW_PLUGIN_NAME',	 	'Juiz Last Tweet Widget' );
-define( 'JUIZ_LTW_VERSION', 		'1.3.7' );
+define( 'JUIZ_LTW_VERSION', 		'1.3.8' );
 define( 'JUIZ_LTW_FILE',		 	__FILE__ );
 define( 'JUIZ_LTW_DIRNAME', 		basename( dirname( __FILE__ ) ) );
 define( 'JUIZ_LTW_PLUGIN_URL',	 	plugin_dir_url( __FILE__ ) );
@@ -272,23 +270,22 @@ class Juiz_Last_Tweet_Widget extends WP_Widget {
 	}
 
 	function widget( $args, $instance ) {
-		extract($args);
+		extract( $args );
 
 		echo $before_widget;
 
 		$title = ( empty( $instance['juiz_last_tweet_title'] ) ) ? '' : apply_filters( 'widget_title', $instance['juiz_last_tweet_title'] );
 
-		if(!empty($title)) {
+		if ( ! empty( $title ) ) {
 			echo $before_title . $title . $after_title;
 		}
 
-		echo $this->juiz_last_tweet_output( $instance, 'widget' );
+		echo $this->juiz_last_tweet_output( 'widget', $instance);
 		echo $after_widget;
 	}
 
-	function juiz_last_tweet_output( $args = array(), $position ) {
-		
-		
+	function juiz_last_tweet_output( $position, $args = array() ) {
+
 		$need_auto_slide_class = $data_delay = '';
 		
 		$the_username		= $args['juiz_last_tweet_username'];
@@ -297,7 +294,6 @@ class Juiz_Last_Tweet_Widget extends WP_Widget {
 		$need_cache			= ( $args['juiz_last_tweet_cache_duration'] != '0' ) ? true : false;
 		$show_avatar		= ( $args['juiz_last_tweet_show_avatar'] ) ? true : false;
 		$show_action_links	= ( $args['juiz_last_tweet_action_links'] ) ? true : false;
-		
 
 		if ( $the_nb_tweet > 1 ) {
 			$need_auto_slide_class = ( $args['juiz_last_tweet_auto_slide'] ) ? ' juiz_ltw_autoslide' : '';
@@ -305,8 +301,7 @@ class Juiz_Last_Tweet_Widget extends WP_Widget {
 				$data_delay = ( intval( $args['juiz_last_tweet_auto_slide_delay'] ) == 0 ) ? ' data-delay="7"' : ' data-delay="' . $args['juiz_last_tweet_auto_slide_delay'] . '"';
 			}
 		}
-		
-		 
+
 		if ( ! function_exists( 'jltw_format_since' ) ) {
 			function jltw_format_since ( $date ) {
 				
@@ -609,8 +604,7 @@ class Juiz_Last_Tweet_Widget extends WP_Widget {
 					</'.$ul.'>
 					'.$follow_us.'
 				</div>'.
-    			apply_filters('juiz_ltw_content_inside', '')
-			;
+				apply_filters('juiz_ltw_content_inside', '');
 
 			// if JS slider is needed by widget
 			if($need_auto_slide_class!='')
@@ -620,34 +614,37 @@ class Juiz_Last_Tweet_Widget extends WP_Widget {
 	} // end of output
 	
 } // end of Widget extend
+add_action( 'widgets_init', 'juiz_ltw_register_widget' );
 
-add_action('widgets_init', create_function('', 'return register_widget("Juiz_Last_Tweet_Widget");'));
+function juiz_ltw_register_widget() {
+	return register_widget("Juiz_Last_Tweet_Widget");
+}
 
 /**
  * Custom styles, <del>JS</del> and Shortcode
  */
- if(!is_admin()) {
+if(!is_admin()) {
 
- 	add_action('wp_enqueue_scripts', 'jltw_add_default_style');
- 	if (!function_exists('jltw_add_default_style')) {
- 		function jltw_add_default_style() {
+	add_action('wp_enqueue_scripts', 'jltw_add_default_style');
+	if (!function_exists('jltw_add_default_style')) {
+		function jltw_add_default_style() {
 
- 			$options = get_option( JUIZ_LTW_SETTING_NAME );
+			$options = get_option( JUIZ_LTW_SETTING_NAME );
 
- 			if ( $options['default_styles'] && isset( $options['css_style_version'] ) && intval( $options['css_style_version'] ) == 1 ) {
- 				wp_enqueue_style('juiz_last_tweet_widget', plugins_url( 'css/juiz_last_tweet.css', __FILE__ ), array(), JUIZ_LTW_VERSION, 'all' );
- 			}
- 			elseif ( $options['default_styles'] && isset( $options['css_style_version'] ) && intval( $options['css_style_version'] ) == 2 ) {
- 				wp_enqueue_style('juiz_last_tweet_widget', plugins_url( 'css/juiz_last_tweet_flat_light.css', __FILE__ ), array(), JUIZ_LTW_VERSION, 'all' );
- 			}
- 			elseif ( $options['default_styles'] && isset( $options['css_style_version'] ) && intval( $options['css_style_version'] ) == 3 ) {
- 				wp_enqueue_style('juiz_last_tweet_widget', plugins_url( 'css/juiz_last_tweet_flat_dark.css', __FILE__ ) , array(), JUIZ_LTW_VERSION, 'all' );
- 			}
- 			elseif ( $options['default_styles'] && ! isset( $options['css_style_version'] ) ) {
- 				wp_enqueue_style('juiz_last_tweet_widget', plugins_url( 'css/juiz_last_tweet.css', __FILE__), array(), JUIZ_LTW_VERSION, 'all' );
- 			}
- 		}
- 	}
+			if ( $options['default_styles'] && isset( $options['css_style_version'] ) && intval( $options['css_style_version'] ) == 1 ) {
+				wp_enqueue_style('juiz_last_tweet_widget', plugins_url( 'css/juiz_last_tweet.css', __FILE__ ), array(), JUIZ_LTW_VERSION, 'all' );
+			}
+			elseif ( $options['default_styles'] && isset( $options['css_style_version'] ) && intval( $options['css_style_version'] ) == 2 ) {
+				wp_enqueue_style('juiz_last_tweet_widget', plugins_url( 'css/juiz_last_tweet_flat_light.css', __FILE__ ), array(), JUIZ_LTW_VERSION, 'all' );
+			}
+			elseif ( $options['default_styles'] && isset( $options['css_style_version'] ) && intval( $options['css_style_version'] ) == 3 ) {
+				wp_enqueue_style('juiz_last_tweet_widget', plugins_url( 'css/juiz_last_tweet_flat_dark.css', __FILE__ ) , array(), JUIZ_LTW_VERSION, 'all' );
+			}
+			elseif ( $options['default_styles'] && ! isset( $options['css_style_version'] ) ) {
+				wp_enqueue_style('juiz_last_tweet_widget', plugins_url( 'css/juiz_last_tweet.css', __FILE__), array(), JUIZ_LTW_VERSION, 'all' );
+			}
+		}
+	}
 
  	// custom head
 	add_action('wp_head', 'juiz_last_tweet_head');
